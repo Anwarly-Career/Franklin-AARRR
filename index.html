@@ -1,0 +1,1148 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>fraenk AARRR Pirate Metrics Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --freenet-blue: #0066CC;
+            --freenet-orange: #FF6600;
+            --freenet-turquoise: #00CCCC;
+            --dark-bg: #222233;
+            --dark-card: #282860;
+            --dark-border: #3a3a5c;
+            --text-light: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.7);
+            --text-muted: rgba(255, 255, 255, 0.5);
+            --success-green: #00CC66;
+            --warning-orange: #FF9500;
+            --error-red: #FF3366;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-light);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .header {
+            background: var(--dark-card);
+            border-bottom: 1px solid var(--dark-border);
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-light);
+            letter-spacing: -0.5px;
+        }
+
+        .header-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success-green);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .info-btn {
+            background: var(--dark-bg);
+            color: var(--text-light);
+            border: 1px solid var(--dark-border);
+            border-radius: 8px;
+            width: 40px;
+            height: 40px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .info-btn:hover {
+            background: var(--freenet-blue);
+            border-color: var(--freenet-blue);
+            transform: translateY(-1px);
+        }
+
+        .main-container {
+            padding: 24px;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        /* GEÄNDERT: Wrapper ist nicht mehr Flexbox */
+        .video-text-wrapper {
+            max-width: 1200px; /* Begrenzte Breite für bessere Lesbarkeit/Zentrierung */
+            margin: 0 auto;
+            padding: 24px;
+            display: block;
+        }
+        
+        /* NEU: Zentrierte Erklärung über dem Video */
+        .dashboard-explanation {
+            text-align: center; /* Zentriert den Text */
+            font-size: 16px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 30px; 
+            padding: 0 5%;
+        }
+        .dashboard-explanation strong {
+            color: var(--text-light);
+        }
+        .explanation-header {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-light);
+            margin-bottom: 15px;
+        }
+
+        /* VIDEO-SEKTION zentriert */
+        .video-section {
+            text-align: center;
+            margin-bottom: 30px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .video-section iframe {
+            max-width: 100%; 
+            width: 100%; 
+            height: 450px;
+            aspect-ratio: 16 / 9;
+            display: block;
+            margin: 0 auto;
+        }
+        /* Responsiveness für das Video */
+        @media (max-width: 900px) {
+            .video-section iframe {
+                height: 350px;
+            }
+        }
+        @media (max-width: 768px) {
+            .video-section {
+                padding: 0 16px;
+            }
+            .video-section iframe {
+                height: 250px;
+            }
+        }
+        /* ENDE NEUE LAYOUT-KLASSEN */
+
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 300px 1fr 280px;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .kpi-column {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .charts-column {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .stats-column {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .kpi-card {
+            background: var(--dark-card);
+            border: 1px solid var(--dark-border);
+            border-radius: 12px;
+            padding: 20px;
+            position: relative;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .kpi-card:hover {
+            background: #2d2d65;
+            border-color: var(--freenet-blue);
+            transform: translateY(-2px);
+        }
+
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--freenet-blue);
+            border-radius: 12px 12px 0 0;
+        }
+
+        .kpi-card.acquisition::before { background: var(--freenet-blue); }
+        .kpi-card.activation::before { background: var(--success-green); }
+        .kpi-card.retention::before { background: var(--freenet-orange); }
+        .kpi-card.revenue::before { background: var(--freenet-turquoise); }
+        .kpi-card.referral::before { background: var(--warning-orange); }
+
+        .kpi-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .kpi-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            line-height: 1.3;
+        }
+
+        .kpi-info-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 16px;
+            padding: 4px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            opacity: 0;
+            transform: scale(0.8);
+        }
+
+        .kpi-card:hover .kpi-info-btn {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .kpi-info-btn:hover {
+            background: var(--dark-border);
+            color: var(--text-light);
+        }
+
+        .kpi-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-light);
+            margin-bottom: 4px;
+            line-height: 1;
+        }
+
+        .kpi-unit {
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .chart-card {
+            background: var(--dark-card);
+            border: 1px solid var(--dark-border);
+            border-radius: 12px;
+            padding: 24px;
+            position: relative;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .chart-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-light);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+
+        .small-chart-container {
+            position: relative;
+            height: 200px;
+            width: 100%;
+        }
+
+        .stats-card {
+            background: var(--dark-card);
+            border: 1px solid var(--dark-border);
+            border-radius: 12px;
+            padding: 16px;
+        }
+
+        .stats-header {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-light);
+            margin-bottom: 16px;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--dark-border);
+        }
+
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .stat-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-light);
+        }
+
+        .table-section {
+            background: var(--dark-card);
+            border: 1px solid var(--dark-border);
+            border-radius: 12px;
+            padding: 24px;
+            margin-top: 24px;
+        }
+
+        .table-header {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-light);
+            margin-bottom: 20px;
+        }
+
+        .metrics-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .metrics-table th {
+            text-align: left;
+            padding: 12px 16px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--dark-border);
+        }
+
+        .metrics-table td {
+            padding: 12px 16px;
+            font-size: 14px;
+            color: var(--text-light);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .metrics-table tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .change-positive {
+            color: var(--success-green);
+            font-weight: 600;
+        }
+
+        .change-negative {
+            color: var(--error-red);
+            font-weight: 600;
+        }
+
+        .tooltip {
+            position: absolute;
+            top: -35px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--dark-bg);
+            color: var(--text-light);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+            z-index: 1000;
+            border: 1px solid var(--dark-border);
+        }
+
+        .tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 5px solid transparent;
+            border-top-color: var(--dark-bg);
+        }
+
+        .kpi-card:hover .tooltip {
+            opacity: 1;
+        }
+
+
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal {
+            background: var(--dark-card);
+            border: 1px solid var(--dark-border);
+            border-radius: 16px;
+            width: 90%;
+            max-width: 500px;
+            transform: scale(0.9) translateY(20px);
+            transition: transform 0.3s ease;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-overlay.show .modal {
+            transform: scale(1) translateY(0);
+        }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--dark-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-light);
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+
+        .close-btn:hover {
+            background: var(--dark-border);
+            color: var(--text-light);
+        }
+
+        .modal-content {
+            padding: 20px;
+        }
+
+        .modal-description {
+            color: var(--text-secondary);
+            line-height: 1.5;
+            margin-bottom: 16px;
+        }
+
+        .modal-insights {
+            color: var(--text-light);
+            line-height: 1.5;
+            padding: 16px;
+            background: rgba(0, 102, 204, 0.1);
+            border-radius: 8px;
+            border-left: 3px solid var(--freenet-blue);
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: var(--text-muted);
+            font-size: 12px;
+            background: var(--dark-card);
+            border-top: 1px solid var(--dark-border);
+            margin-top: 24px;
+        }
+
+        .footer div {
+            margin-bottom: 4px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .kpi-column {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 16px;
+            }
+
+            .stats-column {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 16px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 16px;
+            }
+
+            .header {
+                padding: 12px 16px;
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .kpi-column {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-column {
+                grid-template-columns: 1fr;
+            }
+
+            .chart-card {
+                padding: 16px;
+            }
+
+            .chart-container {
+                height: 250px;
+            }
+
+            .small-chart-container {
+                height: 180px;
+            }
+
+            .table-section {
+                padding: 16px;
+                overflow-x: auto;
+            }
+
+            .metrics-table {
+                min-width: 600px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">fraenk</div>
+        <div class="header-info">
+            <div class="status-indicator">
+                <span class="status-dot"></span>
+                <span>Live Dashboard</span>
+            </div>
+            <button class="info-btn" onclick="showInfoModal()" title="AARRR Framework Info">
+                ℹ️
+            </button>
+        </div>
+    </header>
+
+    <div class="video-text-wrapper">
+        <div class="dashboard-explanation">
+            <h2 class="explanation-header">Anwar's AI-Betastate-Approach zur AARRRnalyse</h2>
+            <p>
+                Dieses Dashboard stellt die Performance von <strong>fraenk</strong> anhand geschätzter AARRR Pirate Metrics dar, die speziell für das digitalisierte Discount-Modell relevant sind.
+            </p>
+            <p>
+                Für eine tiefergehende Analyse des fraenk-Modells, das die Basis dieser Metriken bildet, sehen Sie sich das **unten** eingebettete Video an.
+            </p>
+            <p>
+                Die Kennzahlen (KPIs) auf der linken Seite und die Charts im Hauptbereich können direkt im Dashboard abgelesen werden. Durch Klicken auf die jeweilige Kachel oder den Info-Button (<span style="font-weight: 700;">ℹ️</span>) erscheint ein Fenster, in dem Sie sich detaillierter in die Metrik und die relevanten Marktfaktoren einlesen können.
+            </p>
+        </div>
+        
+        <div class="video-section">
+            <iframe 
+                src="https://www.youtube.com/embed/Zu0TNh2vnME" 
+                title="YouTube video player" 
+                frameborder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                referrerpolicy="strict-origin-when-cross-origin"
+                allowfullscreen>
+            </iframe>
+        </div>
+    </div>
+    <div class="main-container">
+        <div class="dashboard-grid">
+            <div class="kpi-column" id="kpiColumn">
+                </div>
+
+            <div class="charts-column">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3 class="chart-title">Netto-Neukunden Entwicklung</h3>
+                        <button class="kpi-info-btn" onclick="showMetricInfo('chart-retention')" title="Erklärung">
+                            ℹ️
+                        </button>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="retentionChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3 class="chart-title">AARRR Kennzahlen Übersicht</h3>
+                        <button class="kpi-info-btn" onclick="showMetricInfo('chart-aarrr')" title="Erklärung">
+                            ℹ️
+                        </button>
+                    </div>
+                    <div class="small-chart-container">
+                        <canvas id="aarrrChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="table-section">
+                    <h3 class="table-header">Aktuelle Kennzahlen-Änderungen</h3>
+                    <table class="metrics-table">
+                        <thead>
+                            <tr>
+                                <th>Metrik</th>
+                                <th>Kategorie</th>
+                                <th>Aktueller Wert</th>
+                                <th>Trend</th>
+                                <th>Zeitraum</th>
+                            </tr>
+                        </thead>
+                        <tbody id="metricsTableBody">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="stats-column" id="statsColumn">
+                </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div><strong>Quelle:</strong> Schätzungen basierend auf Marktberichten und fraenk Produktstruktur</div>
+        <div>© 2025 Perplexity</div>
+    </footer>
+
+    <div class="modal-overlay" id="metricModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle"></h3>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-content">
+                <div class="modal-description" id="modalDescription"></div>
+                <div class="modal-insights" id="modalInsights"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="infoModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">AARRR Pirate Metrics Framework</h3>
+                <button class="close-btn" onclick="closeInfoModal()">&times;</button>
+            </div>
+            <div class="modal-content">
+                <div class="modal-description">
+                    Das AARRR-Framework unterteilt den Customer Lifecycle in 5 Phasen zur systematischen Wachstumsanalyse.
+                </div>
+                <div class="modal-insights">
+                    <strong>Acquisition:</strong> Kundengewinnung<br>
+                    <strong>Activation:</strong> Erste positive Erfahrung<br>
+                    <strong>Retention:</strong> Kundenbindung<br>
+                    <strong>Revenue:</strong> Monetarisierung<br>
+                    <strong>Referral:</strong> Weiterempfehlungen
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // AARRR Metrics Data - ANGEPASST AUF FRAENK
+        const metricsData = [
+            {
+                kategorie: "Akquisition",
+                name: "Netto-Neukunden (Digital)",
+                wert: "Hoch",
+                einheit: "Volumen",
+                zeitraum: "2024",
+                info: "Die **Netto-Neukunden** (neue Kunden abzüglich Kündigungen) zeigen das absolute Wachstum der Kundenbasis. Ein hohes Volumen deutet auf erfolgreiche Marktansprache und Wettbewerbsfähigkeit hin. Als reiner Online-Anbieter im attraktiven Telekom-Netz profitiert fraenk von geringen Akquisitionskosten. Die Kundengewinnung basiert stark auf der Einfachheit und dem günstigen 10 € Basispreis. Offizielle Kundenzahlen werden nicht separat veröffentlicht.",
+                insight: "Günstiges Preis-Leistungs-Verhältnis und 5G-Zugang im Top-Netz sorgen für konstant hohe Neukundenzahlen, getrieben durch Online-Deals.",
+                trend: "+10%",
+                category_class: "acquisition"
+            },
+            {
+                kategorie: "Akquisition",
+                name: "Conversion Rate Online-Marketing",
+                wert: "4-6",
+                einheit: "%",
+                zeitraum: "2024",
+                info: "Die **Conversion Rate** ist der Prozentsatz der Website-Besucher, die eine gewünschte Aktion (hier: den Kaufabschluss) durchführen. Sie misst die Effizienz des Marketing-Funnels. Die digitale, App-basierte Struktur und der Wegfall komplexer Tarifauswahlen führen zu einer deutlich höheren Conversion Rate als im Branchendurchschnitt (1.5-3%), da der Kaufprozess extrem vereinfacht ist.",
+                insight: "Überdurchschnittlich hohe Conversion Rate aufgrund des 'No-Frills'-Ansatzes und des einfachen, schnellen Online-Abschlusses.",
+                trend: "Stabil",
+                category_class: "acquisition"
+            },
+            {
+                kategorie: "Aktivierung",
+                name: "Aktivierungsrate Neukunden",
+                wert: "95-98",
+                einheit: "%",
+                zeitraum: "2024",
+                info: "Die **Aktivierungsrate** misst den Anteil der Neukunden, die das Produkt nach dem Kauf erfolgreich in Betrieb nehmen (z.B. SIM-Karte einlegen/aktivieren). Sie ist ein Indikator für die Qualität des Onboarding-Prozesses. Der gesamte Service, von der Bestellung bis zur SIM-Aktivierung, wird über die fraenk App verwaltet. Die hohe Erfolgsquote spiegelt die Effizienz des rein digitalen, stark automatisierten Onboarding-Prozesses wider.",
+                insight: "Die App-zentrierte Verwaltung und das Fehlen physischer Shops maximieren die Kontrolle über den Onboarding-Flow und die sofortige Aktivierung.",
+                trend: "+1%",
+                category_class: "activation"
+            },
+            {
+                kategorie: "Aktivierung",
+                name: "App Daily Active Users (DAU)",
+                wert: "30-40",
+                einheit: "%",
+                zeitraum: "2024 (geschätzt)",
+                info: "Der **DAU-Wert (Daily Active Users)** misst den Prozentsatz der gesamten Nutzerbasis, der die App täglich nutzt. Dies ist ein Indikator für die Produktakzeptanz nach der Aktivierung. Bei fraenk ist dies der wichtigste Indikator für die Nutzung des zentralen Kundenkanals (Bezahlung, Daten-Upgrade, Kündigung). Hoher DAU-Wert deutet auf eine erfolgreiche Aktivierung der App-Nutzung hin.",
+                insight: "Hohe App-Nutzung ist entscheidend und spricht für eine gelungene Verankerung des Produkts im digitalen Alltag der Kunden.",
+                trend: "+3%",
+                category_class: "activation"
+            },
+            {
+                kategorie: "Bindung",
+                name: "Churn Rate",
+                wert: "15-20",
+                einheit: "% pro Jahr",
+                zeitraum: "2024 (geschätzt)",
+                info: "Die **Churn Rate** gibt den Prozentsatz der Kunden an, die das Unternehmen innerhalb eines bestimmten Zeitraums verlassen. Sie ist der wichtigste Indikator für Kundenloyalität. Aufgrund der **monatlichen Kündbarkeit** und des Fokus auf preissensible, digitale Kunden ist die Churn Rate von Natur aus höher als bei 24-Monats-Verträgen. Die effektive Churn-Reduktion erfolgt über das **Fraenk for Friends**-Programm.",
+                insight: "Erwartungsgemäß hohe Churn Rate durch flexible Kündbarkeit. Das Risiko wird durch attraktive, dauerhafte Datengeschenke (Referral) reduziert.",
+                trend: "Stabil",
+                category_class: "retention"
+            },
+            {
+                kategorie: "Bindung",
+                name: "Kundenbindungsrate",
+                wert: "80-85",
+                einheit: "%",
+                zeitraum: "2024 (geschätzt)",
+                info: "Die **Kundenbindungsrate** ist das Gegenstück zur Churn Rate (100 % minus Churn) und misst den Prozentsatz der Kunden, die dem Unternehmen über einen bestimmten Zeitraum treu bleiben. Die Loyalität wird durch **kontinuierliche, kostenlose Datenvolumen-Erhöhungen** für Bestandskunden und das Referral-Programm gesichert.",
+                insight: "Kundenloyalität wird über kontinuierliche 'Goodies' und Tarif-Upgrades statt über lange Vertragslaufzeiten gesichert.",
+                trend: "+0.5%",
+                category_class: "retention"
+            },
+            {
+                kategorie: "Umsatz",
+                name: "ARPU (ø Umsatz pro User)",
+                wert: "10,0-15,0",
+                einheit: "€/Monat",
+                zeitraum: "2024",
+                info: "Der **Average Revenue per User (ARPU)** ist der durchschnittliche monatliche Umsatz pro Kunde. Er ist eine zentrale Kennzahl für die Monetarisierung der Kundenbasis. Der Basispreis liegt bei 10,00 €. Höherer ARPU wird ausschließlich durch **Upselling** von Datenvolumen (z.B. 25 GB zusätzlich für 5 €/Monat) oder monatliche Datenpässe generiert. Dies ist das primäre Monetarisierungsziel.",
+                insight: "Der Kern-ARPU ist niedrig und stabil. Der Monetarisierungserfolg hängt stark von der erfolgreichen Upselling-Quote für zusätzliche Datenvolumen ab.",
+                trend: "Stabil",
+                category_class: "revenue"
+            },
+            {
+                kategorie: "Umsatz",
+                name: "Customer Lifetime Value (CLTV)",
+                wert: "180-360",
+                einheit: "€ (ges.)",
+                zeitraum: "2024 (berechnet)",
+                info: "Der **CLTV** schätzt den Nettogewinn, der über die gesamte Dauer der Kundenbeziehung erwartet wird. Er dient als Maßstab für das maximale Akquisitionsbudget. Angesichts des monatlich kündbaren Discount-Tarifs und des niedrigeren ARPU ist der CLTV niedriger als bei 24-Monats-Verträgen. Der Wert wird durch extrem niedrige Akquisitionskosten und Betriebskosten (keine Shops) profitabel gehalten.",
+                insight: "Der Fokus liegt auf niedrigen Akquisitionskosten (CPA), um den niedrigeren CLTV profitabel zu halten.",
+                trend: "Stabil",
+                category_class: "revenue"
+            },
+            {
+                kategorie: "Empfehlung",
+                name: "Empfehlungs­programm Prämie",
+                wert: "+5 GB",
+                einheit: "Daten/Monat (dauerhaft)",
+                zeitraum: "2024/2025",
+                info: "Die **Prämie** ist der Anreiz, den ein Kunde (Werber) und ein Neukunde (Geworbener) für eine erfolgreiche Empfehlung erhalten. Sie misst die Attraktivität des Referral-Programms. Das 'fraenk for Friends'-Programm belohnt Werber und Geworbenen dauerhaft mit zusätzlichem Datenvolumen (+5 GB) zum gleichen monatlichen Preis. Dies erhöht den Produktwert, ohne direkten Geldfluss zu verursachen.",
+                insight: "Das Programm ist extrem effektiv, da es den direkten Produktwert (Datenvolumen) erhöht, was zu hoher Nutzung und geringeren Churn führt.",
+                trend: "Sehr hoch",
+                category_class: "referral"
+            },
+            {
+                kategorie: "Empfehlung",
+                name: "Empfehlungsquote (viral)",
+                wert: "3-5",
+                einheit: "%",
+                zeitraum: "2024 (geschätzt)",
+                info: "Die **Empfehlungsquote (auch Viralitätsfaktor)** misst den Anteil neuer Kunden, die durch Empfehlungen gewonnen wurden. Ein hoher Wert zeigt starkes organisches Wachstum. Aufgrund des attraktiven und direkt nutzbaren Anreizes (+5 GB) und der Einfachheit des Produkts wird eine überdurchschnittliche Viralität angenommen. Das Programm ist eine der stärksten Akquisitionsquellen.",
+                insight: "Das Empfehlungsprogramm ist eine der stärksten Akquisitionsquellen und generiert ein hohes, organisches Wachstum.",
+                trend: "+0.5%",
+                category_class: "referral"
+            }
+        ];
+
+        let retentionChart = null;
+        let aarrrChart = null;
+
+        // Initialize the dashboard
+        function initDashboard() {
+            createKPICards();
+            createStatsCards();
+            createChartsSection();
+            populateMetricsTable();
+            updateChartsData();
+        }
+
+        // Funktion zum Anpassen der Chart-Daten (basierend auf fraenk-Performance)
+        function updateChartsData() {
+            // Passt die Performance Scores basierend auf den fraenk-Metriken an: 
+            // Aktivierung und Empfehlung hoch, Umsatz und Bindung niedriger (wegen monatl. Kündigung)
+            if (aarrrChart) {
+                aarrrChart.data.datasets[0].data = [90, 95, 75, 70, 95]; 
+                aarrrChart.update();
+            }
+        }
+
+
+        // Create KPI Cards
+        function createKPICards() {
+            const kpiColumn = document.getElementById('kpiColumn');
+            
+            metricsData.forEach((metric, index) => {
+                const kpiCard = document.createElement('div');
+                kpiCard.className = `kpi-card ${metric.category_class}`;
+                kpiCard.onclick = () => showMetricInfo(`metric-${index}`);
+                
+                kpiCard.innerHTML = `
+                    <div class="tooltip">Klicken für Erklärung</div>
+                    <div class="kpi-header">
+                        <div class="kpi-title">${metric.name}</div>
+                        <button class="kpi-info-btn" onclick="event.stopPropagation(); showMetricInfo('metric-${index}')" title="Erklärung">
+                            ℹ️
+                        </button>
+                    </div>
+                    <div class="kpi-value">${metric.wert}</div>
+                    <div class="kpi-unit">${metric.einheit}</div>
+                `;
+                
+                kpiColumn.appendChild(kpiCard);
+            });
+        }
+
+        // Create Stats Cards
+        function createStatsCards() {
+            const statsColumn = document.getElementById('statsColumn');
+            
+            // Current Period Summary - ANGEPASST AUF FRAENK
+            const currentStats = document.createElement('div');
+            currentStats.className = 'stats-card';
+            currentStats.innerHTML = `
+                <h4 class="stats-header">Aktuelle Periode (2024)</h4>
+                <div class="stat-item">
+                    <span class="stat-label">Geschätzte Kundenbasis</span>
+                    <span class="stat-value">~300k</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Basispreis ARPU</span>
+                    <span class="stat-value change-positive">10,0€</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Netzqualität</span>
+                    <span class="stat-value">Telekom 5G</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Kündigungsfrist</span>
+                    <span class="stat-value change-positive">Monatl.</span>
+                </div>
+            `;
+            
+            // Performance Indicators - ANGEPASST AUF FRAENK
+            const performanceStats = document.createElement('div');
+            performanceStats.className = 'stats-card';
+            performanceStats.innerHTML = `
+                <h4 class="stats-header">Performance Indikatoren</h4>
+                <div class="stat-item">
+                    <span class="stat-label">Gesch. Churn Rate</span>
+                    <span class="stat-value change-negative">15-20%</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Aktivierungsrate</span>
+                    <span class="stat-value">95-98%</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Conversion Rate</span>
+                    <span class="stat-value">4-6%</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Referral Prämie</span>
+                    <span class="stat-value change-positive">+5 GB</span>
+                </div>
+            `;
+            
+            // Targets & Goals - ANGEPASST AUF FRAENK
+            const targetStats = document.createElement('div');
+            targetStats.className = 'stats-card';
+            targetStats.innerHTML = `
+                <h4 class="stats-header">Ziele & Prognosen</h4>
+                <div class="stat-item">
+                    <span class="stat-label">CLTV Zielwert</span>
+                    <span class="stat-value">250€</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Ziel Churn Rate</span>
+                    <span class="stat-value"><15%</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Ziel ARPU (mit Upgrades)</span>
+                    <span class="stat-value">12,5€</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">App-Bewertung (iOS/Android)</span>
+                    <span class="stat-value">4.5+</span>
+                </div>
+            `;
+            
+            statsColumn.appendChild(currentStats);
+            statsColumn.appendChild(performanceStats);
+            statsColumn.appendChild(targetStats);
+        }
+
+        // Create Charts (Logik beibehalten, Daten angepasst)
+        function createChartsSection() {
+            createRetentionChart();
+            createAARRRChart();
+        }
+
+        // Create Retention Chart (Daten auf fraenk-typisches Wachstum angepasst)
+        function createRetentionChart() {
+            const ctx = document.getElementById('retentionChart').getContext('2d');
+            
+            retentionChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'],
+                    datasets: [{
+                        label: 'Netto-Neukunden (Geschätzt in Tausend)',
+                        data: [4, 5, 6, 7, 6, 8, 9, 11, 10, 12, 11, 15],
+                        borderColor: '#0066CC',
+                        backgroundColor: 'rgba(0, 102, 204, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: { color: '#ffffff' }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { color: '#ffffff' },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                        },
+                        x: {
+                            ticks: { color: '#ffffff' },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Create AARRR Overview Chart (Daten auf fraenk-Performance angepasst)
+        function createAARRRChart() {
+            const ctx = document.getElementById('aarrrChart').getContext('2d');
+            
+            aarrrChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Akquisition', 'Aktivierung', 'Bindung', 'Umsatz', 'Empfehlung'],
+                    datasets: [{
+                        label: 'Performance Score',
+                        data: [90, 95, 75, 70, 95], /* Scores angepasst */
+                        backgroundColor: [
+                            '#0066CC',
+                            '#00CC66', 
+                            '#FF6600',
+                            '#00CCCC',
+                            '#FF9500'
+                        ],
+                        borderColor: 'rgba(255, 255, 255, 0.2)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: { color: '#ffffff' },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                        },
+                        x: {
+                            ticks: { color: '#ffffff' },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Populate Metrics Table
+        function populateMetricsTable() {
+            const tableBody = document.getElementById('metricsTableBody');
+            
+            metricsData.forEach(metric => {
+                const row = document.createElement('tr');
+                const trendClass = metric.trend.includes('+') ? 'change-positive' : 
+                                 metric.trend.includes('-') ? 'change-negative' : '';
+                
+                row.innerHTML = `
+                    <td>${metric.name}</td>
+                    <td>${metric.kategorie}</td>
+                    <td>${metric.wert} ${metric.einheit}</td>
+                    <td class="${trendClass}">${metric.trend}</td>
+                    <td>${metric.zeitraum}</td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Show Metric Info
+        function showMetricInfo(metricId) {
+            let metric;
+            
+            if (metricId.startsWith('metric-')) {
+                const index = parseInt(metricId.replace('metric-', ''));
+                metric = metricsData[index];
+            } else if (metricId === 'chart-retention') {
+                metric = {
+                    name: 'Netto-Neukunden Entwicklung',
+                    info: 'Zeigt die geschätzte monatliche Entwicklung der Netto-Neukunden, basierend auf der starken Marktdurchdringung von fraenk.',
+                    insight: 'Der digitale Ansatz ermöglicht schnelle Skalierung, erfordert aber kontinuierliche Marketinginvestitionen.'
+                };
+            } else if (metricId === 'chart-aarrr') {
+                metric = {
+                    name: 'AARRR Performance Score',
+                    info: 'Übersicht der Performance-Scores für alle AARRR-Kategorien. Besonders hoch bei Aktivierung und Empfehlung durch das einfache, App-basierte Produkt und die starke Viralität.',
+                    insight: 'Aktivierung und Empfehlung sind die Stärken. Bindung und Umsatz sind aufgrund des monatlich kündbaren Discount-Modells die größten Herausforderungen.'
+                };
+            }
+            
+            if (metric) {
+                document.getElementById('modalTitle').textContent = metric.name;
+                document.getElementById('modalDescription').textContent = metric.info;
+                document.getElementById('modalInsights').textContent = metric.insight;
+                document.getElementById('metricModal').classList.add('show');
+            }
+        }
+
+        // Close Modal
+        function closeModal() {
+            document.getElementById('metricModal').classList.remove('show');
+        }
+
+        // Show Info Modal
+        function showInfoModal() {
+            document.getElementById('infoModal').classList.add('show');
+        }
+
+        // Close Info Modal
+        function closeInfoModal() {
+            document.getElementById('infoModal').classList.remove('show');
+        }
+
+        // Close modal when clicking outside
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('modal-overlay')) {
+                e.target.classList.remove('show');
+            }
+        });
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                document.getElementById('metricModal').classList.remove('show');
+                document.getElementById('infoModal').classList.remove('show');
+            }
+        });
+
+        // Initialize dashboard when page loads
+        document.addEventListener('DOMContentLoaded', initDashboard);
+    </script>
+</body>
+</html>
