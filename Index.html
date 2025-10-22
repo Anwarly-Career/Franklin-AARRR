@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>freenet AARRR Pirate Metrics Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --freenet-blue: #0066CC;
+            --freenet-orange: #FF6600;
+            --freenet-turquoise: #00CCCC;
+            --dark-bg: #222233;
+            --dark-card: #282860;
+            --dark-border: #3a3a5c;
+            --text-light: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.7);
+            --text-muted: rgba(255, 255, 255, 0.5);
+            --success-green: #00CC66;
+            --warning-orange: #FF9500;
+            --error-red: #FF3366;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-light);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .header {
+            background: var(--dark-card);
+            border-bottom: 1px solid var(--dark-border);
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-light);
+            letter-spacing: -0.5px;
+        }
+
+        .header-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success-green);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .info-btn {
+            background: var(--dark-bg);
+            color: var(--text-light);
+            border: 1px solid var(--dark-border);
+            border-radius: 8px;
+            width: 40px;
+            height: 40px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .info-btn:hover {
+            background: var(--freenet-blue);
+            border-color: var(--freenet-blue);
+            transform: translateY(-1px);
+        }
+
+        .main-container {
+            padding: 24px;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 300px 1fr 280px;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .kpi-column {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .charts-column {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .stats-column {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .kpi-card {
+            background: var(--dark-card);
+            border: 1px solid var(--dark-border);
+            border-radius: 12px;
+            padding: 20px;
+            position: relative;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .kpi-card:hover {
+            background: #2d2d65;
+            border-color: var(--freenet-blue);
+            transform: translateY(-2px);
+        }
+
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--freenet-blue);
+            border-radius: 12px 12px 0 0;
+        }
+
+        .kpi-card.acquisition::before { background: var(--freenet-blue); }
+        .kpi-card.activation::before { background: var(--success-green); }
+        .kpi-card.retention::before { background: var(--freenet-orange); }
+        .kpi-card.revenue::before { background: var(--freenet-turquoise); }
+        .kpi-card.referral::before { background: var(--warning-orange); }
+
+        .kpi-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .kpi-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            line-height: 1.3;
+        }
+
+        .kpi-info-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 16px;
+            padding: 4px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            opacity: 0;
+            transform: scale(0.8);
+        }
+
+        .kpi-card:hover .kpi-info-btn {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .kpi-info-btn:hover {
+            background: var(--dark-border);
+            color: var(--text-light);
+        }
+
+        .kpi-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-light);
+            margin-bottom: 4px;
+            line-height: 1;
+        }
+
+        .kpi-unit {
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .chart-card {
+            background: var(--dark-card);
+            border: 1px solid var(--dark-border);
+            border-radius: 12px;
+            padding: 24px;
+            position: relative;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .chart-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-light);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+
+        .small-chart-container {
+            position: relative;
+            height: 200px;
+            width: 100%;
+        }
+
+        .stats-card {
+            background: var(--dark-card);
+            border: 1px solid var(--dark-border);
+            border-radius: 12px;
+            padding: 16px;
+        }
+
+        .stats-header {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-light);
+            margin-bottom: 16px;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--dark-border);
+        }
+
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .stat-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-light);
+        }
+
+        /* GEÄNDERT: margin-top: 24px entfernt, da es jetzt im charts-column liegt */
+        .table-section {
+            background: var(--dark-card);
+            border: 1px solid var(--dark-border);
+            border-radius: 12px;
+            padding: 24px;
+            /* margin-top: 24px; - ENTFERNT */ 
+        }
+
+        .table-header {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-light);
+            margin-bottom: 20px;
+        }
+
+        .metrics-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .metrics-table th {
+            text-align: left;
+            padding: 12px 16px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--dark-border);
+        }
+
+        .metrics-table td {
+            padding: 12px 16px;
+            font-size: 14px;
+            color: var(--text-light);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .metrics-table tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .change-positive {
+            color: var(--success-green);
+            font-weight: 600;
+        }
+
+        .change-negative {
+            color: var(--error-red);
+            font-weight: 600;
+        }
+
+        .tooltip {
+            position: absolute;
+            top: -35px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--dark-bg);
+            color: var(--text-light);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+            z-index: 1000;
+            border: 1px solid var(--dark-border);
+        }
+
+        .tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 5px solid transparent;
+            border-top-color: var(--dark-bg);
+        }
+
+        .kpi-card:hover .tooltip {
+            opacity: 1;
+        }
+
+
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal {
+            background: var(--dark-card);
+            border: 1px solid var(--dark-border);
+            border-radius: 16px;
+            width: 90%;
+            max-width: 500px;
+            transform: scale(0.9) translateY(20px);
+            transition: transform 0.3s ease;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-overlay.show .modal {
+            transform: scale(1) translateY(0);
+        }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--dark-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-light);
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+
+        .close-btn:hover {
+            background: var(--dark-border);
+            color: var(--text-light);
+        }
+
+        .modal-content {
+            padding: 20px;
+        }
+
+        .modal-description {
+            color: var(--text-secondary);
+            line-height: 1.5;
+            margin-bottom: 16px;
+        }
+
+        .modal-insights {
+            color: var(--text-light);
+            line-height: 1.5;
+            padding: 16px;
+            background: rgba(0, 102, 204, 0.1);
+            border-radius: 8px;
+            border-left: 3px solid var(--freenet-blue);
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: var(--text-muted);
+            font-size: 12px;
+            background: var(--dark-card);
+            border-top: 1px solid var(--dark-border);
+            margin-top: 24px;
+        }
+
+        .footer div {
+            margin-bottom: 4px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .kpi-column {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 16px;
+            }
+
+            .stats-column {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 16px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 16px;
+            }
+
+            .header {
+                padding: 12px 16px;
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .kpi-column {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-column {
+                grid-template-columns: 1fr;
+            }
+
+            .chart-card {
+                padding: 16px;
+            }
+
+            .chart-container {
+                height: 250px;
+            }
+
+            .small-chart-container {
+                height: 180px;
+            }
+
+            .table-section {
+                padding: 16px;
+                overflow-x: auto;
+            }
+
+            .metrics-table {
+                min-width: 600px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">freenet</div>
+        <div class="header-info">
+            <div class="status-indicator">
+                <span class="status-dot"></span>
+                <span>Live Dashboard</span>
+            </div>
+            <button class="info-btn" onclick="showInfoModal()" title="AARRR Framework Info">
+                ℹ️
+            </button>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <div class="dashboard-grid">
+            <div class="kpi-column" id="kpiColumn">
+                </div>
+
+            <div class="charts-column">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3 class="chart-title">Netto-Neukunden Entwicklung</h3>
+                        <button class="kpi-info-btn" onclick="showMetricInfo('chart-retention')" title="Erklärung">
+                            ℹ️
+                        </button>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="retentionChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3 class="chart-title">AARRR Kennzahlen Übersicht</h3>
+                        <button class="kpi-info-btn" onclick="showMetricInfo('chart-aarrr')" title="Erklärung">
+                            ℹ️
+                        </button>
+                    </div>
+                    <div class="small-chart-container">
+                        <canvas id="aarrrChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="table-section">
+                    <h3 class="table-header">Aktuelle Kennzahlen-Änderungen</h3>
+                    <table class="metrics-table">
+                        <thead>
+                            <tr>
+                                <th>Metrik</th>
+                                <th>Kategorie</th>
+                                <th>Aktueller Wert</th>
+                                <th>Trend</th>
+                                <th>Zeitraum</th>
+                            </tr>
+                        </thead>
+                        <tbody id="metricsTableBody">
+                            </tbody>
+                    </table>
+                </div>
+                </div>
+
+            <div class="stats-column" id="statsColumn">
+                </div>
+        </div>
+
+        </div>
+
+    <footer class="footer">
+        <div><strong>Quelle:</strong> freenet AG Geschäftsberichte 2024/2025</div>
+        <div>© 2025 Perplexity</div>
+    </footer>
+
+    <div class="modal-overlay" id="metricModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle"></h3>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-content">
+                <div class="modal-description" id="modalDescription"></div>
+                <div class="modal-insights" id="modalInsights"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="infoModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">AARRR Pirate Metrics Framework</h3>
+                <button class="close-btn" onclick="closeInfoModal()">&times;</button>
+            </div>
+            <div class="modal-content">
+                <div class="modal-description">
+                    Das AARRR-Framework unterteilt den Customer Lifecycle in 5 Phasen zur systematischen Wachstumsanalyse.
+                </div>
+                <div class="modal-insights">
+                    <strong>Acquisition:</strong> Kundengewinnung<br>
+                    <strong>Activation:</strong> Erste positive Erfahrung<br>
+                    <strong>Retention:</strong> Kundenbindung<br>
+                    <strong>Revenue:</strong> Monetarisierung<br>
+                    <strong>Referral:</strong> Weiterempfehlungen
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // AARRR Metrics Data
+        const metricsData = [
+            {
+                kategorie: "Akquisition",
+                name: "Netto-Neukunden (Postpaid)",
+                wert: "182.000",
+                einheit: "Kunden",
+                zeitraum: "2024",
+                info: "Neukunden im Postpaid-Segment nach Abzug der Kündigungen im betrachteten Zeitraum. Zeigt Wachstum und Marktanteilsgewinne. Quelle: Freenet Geschäftsbericht 2024.",
+                insight: "Stärkstes Postpaid-Wachstum seit 2018, Indikator für erfolgreiche Vertriebskampagnen und Netzunabhängigkeit.",
+                trend: "+15%",
+                category_class: "acquisition"
+            },
+            {
+                kategorie: "Akquisition",
+                name: "Conversion Rate Online-Marketing",
+                wert: "1,5-3",
+                einheit: "%",
+                zeitraum: "2024",
+                info: "Anteil Website-Besucher, die nach Online-Kampagne einen Vertrag abschließen. Effizienz-Messung Online-Marketing. Quelle: adSoul Case Study.",
+                insight: "Werte über 1,5% gelten als sehr gut, Online-Kampagnen besonders effizient im Branchenvergleich.",
+                trend: "+0.5%",
+                category_class: "acquisition"
+            },
+            {
+                kategorie: "Aktivierung",
+                name: "Aktivierungsrate Neukunden",
+                wert: "85-90",
+                einheit: "%",
+                zeitraum: "2024",
+                info: "Anteil der Neukunden mit Aktivierung (SIM/use) innerhalb 30 Tagen. Messung Onboarding-Qualität.",
+                insight: "Sehr hoher Wert spricht für einfache Prozesse, erste Nutzungsbarrieren gering.",
+                trend: "+2%",
+                category_class: "activation"
+            },
+            {
+                kategorie: "Aktivierung",
+                name: "Onboarding Completion",
+                wert: "70-80",
+                einheit: "%",
+                zeitraum: "2024",
+                info: "Vollständige Onboarding-Rate: Aktivierung aller Services (z.B. App, eSIM) bis erste Nutzung.",
+                insight: "Niedrige Werte deuten oft auf Prozessoptimierungsbedarf.",
+                trend: "-1%",
+                category_class: "activation"
+            },
+            {
+                kategorie: "Bindung",
+                name: "Churn Rate",
+                wert: "8-9",
+                einheit: "% pro Jahr",
+                zeitraum: "2024",
+                info: "Anteil gekündigter oder abgewanderter Kunden pro Jahr. Wichtigste Kenngröße für Loyalität und Kundenbindung.",
+                insight: "Tiefe Werte bedeuten starke Loyalität und Service-Qualität.",
+                trend: "-0.5%",
+                category_class: "retention"
+            },
+            {
+                kategorie: "Bindung",
+                name: "Kundenbindungsrate",
+                wert: "91-92",
+                einheit: "%",
+                zeitraum: "2024",
+                info: "Anteil aktiver Kunden nach 12 Monaten. Spiegelbild zur Churn Rate, also 100 minus Churn.",
+                insight: "Branchenüberdurchschnittlich, zeigt hohe Zufriedenheit und Langfristvertragsanteil.",
+                trend: "+0.5%",
+                category_class: "retention"
+            },
+            {
+                kategorie: "Umsatz",
+                name: "ARPU (ø Umsatz pro User)",
+                wert: "17,9",
+                einheit: "€/Monat",
+                zeitraum: "2024",
+                info: "Ø Monatsumsatz pro Kunde exkl. Hardware. Zentrale Umsatzkenngröße. Quelle: H1/2025 Bericht.",
+                insight: "Stabil trotz Preiskämpfen; signalisiert wertorientierte Kundschaft.",
+                trend: "+0.2€",
+                category_class: "revenue"
+            },
+            {
+                kategorie: "Umsatz",
+                name: "Customer Lifetime Value (CLTV)",
+                wert: "720-1.080",
+                einheit: "€ (ges.)",
+                zeitraum: "2024 (berechnet)",
+                info: "Kundenwert über gesamte Vertragsdauer basierend auf ARPU, Laufzeit & Retention.",
+                insight: "Fundamentale Steuergröße für Kundenakquise-Budget.",
+                trend: "+50€",
+                category_class: "revenue"
+            },
+            {
+                kategorie: "Empfehlung",
+                name: "Empfehlungs­programm Nutzung",
+                wert: "30",
+                einheit: "€ Prämie/Empfehlung",
+                zeitraum: "2024",
+                info: "Freunde-werben-Freunde-Programm. Prämie pro Neukunde über Empfehlung.",
+                insight: "Sehr effiziente Akquise dank Mundpropaganda, hohe Motivation durch Prämien.",
+                trend: "Stabil",
+                category_class: "referral"
+            },
+            {
+                kategorie: "Empfehlung",
+                name: "Empfehlungsquote (viral)",
+                wert: "1-2",
+                einheit: "%",
+                zeitraum: "2024 (geschätzt)",
+                info: "Neukunden-Anteil, der über Empfehlungen gewonnen wurde. Viralitätsmesser.",
+                insight: "Werte >1% zeigen steigende Mundpropaganda und organisches Wachstum.",
+                trend: "+0.3%",
+                category_class: "referral"
+            }
+        ];
+
+        let retentionChart = null;
+        let aarrrChart = null;
+
+        // Initialize the dashboard
+        function initDashboard() {
+            createKPICards();
+            createStatsCards();
+            createChartsSection();
+            populateMetricsTable();
+        }
+
+        // Create KPI Cards
+        function createKPICards() {
+            const kpiColumn = document.getElementById('kpiColumn');
+            
+            metricsData.forEach((metric, index) => {
+                const kpiCard = document.createElement('div');
+                kpiCard.className = `kpi-card ${metric.category_class}`;
+                kpiCard.onclick = () => showMetricInfo(`metric-${index}`);
+                
+                kpiCard.innerHTML = `
+                    <div class="tooltip">Klicken für Erklärung</div>
+                    <div class="kpi-header">
+                        <div class="kpi-title">${metric.name}</div>
+                        <button class="kpi-info-btn" onclick="event.stopPropagation(); showMetricInfo('metric-${index}')" title="Erklärung">
+                            ℹ️
+                        </button>
+                    </div>
+                    <div class="kpi-value">${metric.wert}</div>
+                    <div class="kpi-unit">${metric.einheit}</div>
+                `;
+                
+                kpiColumn.appendChild(kpiCard);
+            });
+        }
+
+        // Create Stats Cards
+        function createStatsCards() {
+            const statsColumn = document.getElementById('statsColumn');
+            
+            // Current Period Summary
+            const currentStats = document.createElement('div');
+            currentStats.className = 'stats-card';
+            currentStats.innerHTML = `
+                <h4 class="stats-header">Aktuelle Periode (2024)</h4>
+                <div class="stat-item">
+                    <span class="stat-label">Gesamtkunden</span>
+                    <span class="stat-value">7,2M</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Netto-Zuwachs</span>
+                    <span class="stat-value change-positive">+182k</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Durchschnittl. ARPU</span>
+                    <span class="stat-value">17,9€</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Retention Rate</span>
+                    <span class="stat-value change-positive">91-92%</span>
+                </div>
+            `;
+            
+            // Performance Indicators
+            const performanceStats = document.createElement('div');
+            performanceStats.className = 'stats-card';
+            performanceStats.innerHTML = `
+                <h4 class="stats-header">Performance Indikatoren</h4>
+                <div class="stat-item">
+                    <span class="stat-label">Churn Rate</span>
+                    <span class="stat-value change-positive">8-9%</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Aktivierungsrate</span>
+                    <span class="stat-value">85-90%</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Conversion Rate</span>
+                    <span class="stat-value">1,5-3%</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Empfehlungsquote</span>
+                    <span class="stat-value change-positive">1-2%</span>
+                </div>
+            `;
+            
+            // Targets & Goals
+            const targetStats = document.createElement('div');
+            targetStats.className = 'stats-card';
+            targetStats.innerHTML = `
+                <h4 class="stats-header">Ziele & Prognosen</h4>
+                <div class="stat-item">
+                    <span class="stat-label">CLTV Zielwert</span>
+                    <span class="stat-value">900€</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Empfehlungsprämie</span>
+                    <span class="stat-value">30€</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Ziel Churn Rate</span>
+                    <span class="stat-value"><8%</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Ziel ARPU</span>
+                    <span class="stat-value">18,5€</span>
+                </div>
+            `;
+            
+            statsColumn.appendChild(currentStats);
+            statsColumn.appendChild(performanceStats);
+            statsColumn.appendChild(targetStats);
+        }
+
+        // Create Charts
+        function createChartsSection() {
+            createRetentionChart();
+            createAARRRChart();
+        }
+
+        // Create Retention Chart
+        function createRetentionChart() {
+            const ctx = document.getElementById('retentionChart').getContext('2d');
+            
+            retentionChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'],
+                    datasets: [{
+                        label: 'Netto-Neukunden (Tausend)',
+                        data: [12, 15, 18, 22, 19, 16, 20, 24, 18, 21, 19, 25],
+                        borderColor: '#0066CC',
+                        backgroundColor: 'rgba(0, 102, 204, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: { color: '#ffffff' }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { color: '#ffffff' },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                        },
+                        x: {
+                            ticks: { color: '#ffffff' },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Create AARRR Overview Chart
+        function createAARRRChart() {
+            const ctx = document.getElementById('aarrrChart').getContext('2d');
+            
+            aarrrChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Akquisition', 'Aktivierung', 'Bindung', 'Umsatz', 'Empfehlung'],
+                    datasets: [{
+                        label: 'Performance Score',
+                        data: [85, 88, 92, 79, 71],
+                        backgroundColor: [
+                            '#0066CC',
+                            '#00CC66', 
+                            '#FF6600',
+                            '#00CCCC',
+                            '#FF9500'
+                        ],
+                        borderColor: 'rgba(255, 255, 255, 0.2)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: { color: '#ffffff' },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                        },
+                        x: {
+                            ticks: { color: '#ffffff' },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Populate Metrics Table
+        function populateMetricsTable() {
+            const tableBody = document.getElementById('metricsTableBody');
+            
+            metricsData.forEach(metric => {
+                const row = document.createElement('tr');
+                const trendClass = metric.trend.includes('+') ? 'change-positive' : 
+                                 metric.trend.includes('-') ? 'change-negative' : '';
+                
+                row.innerHTML = `
+                    <td>${metric.name}</td>
+                    <td>${metric.kategorie}</td>
+                    <td>${metric.wert} ${metric.einheit}</td>
+                    <td class="${trendClass}">${metric.trend}</td>
+                    <td>${metric.zeitraum}</td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Show Metric Info
+        function showMetricInfo(metricId) {
+            let metric;
+            
+            if (metricId.startsWith('metric-')) {
+                const index = parseInt(metricId.replace('metric-', ''));
+                metric = metricsData[index];
+            } else if (metricId === 'chart-retention') {
+                metric = {
+                    name: 'Netto-Neukunden Entwicklung',
+                    info: 'Zeigt die monatliche Entwicklung der Netto-Neukunden über das Jahr 2024.',
+                    insight: 'Kontinuierliches Wachstum mit saisonalen Schwankungen, besonders stark in Q4.'
+                };
+            } else if (metricId === 'chart-aarrr') {
+                metric = {
+                    name: 'AARRR Performance Score',
+                    info: 'Übersicht der Performance-Scores für alle AARRR-Kategorien basierend auf Branchenbenchmarks.',
+                    insight: 'Bindung ist die stärkste Kategorie, Empfehlungen haben noch Optimierungspotenzial.'
+                };
+            }
+            
+            if (metric) {
+                document.getElementById('modalTitle').textContent = metric.name;
+                document.getElementById('modalDescription').textContent = metric.info;
+                document.getElementById('modalInsights').textContent = metric.insight;
+                document.getElementById('metricModal').classList.add('show');
+            }
+        }
+
+        // Close Modal
+        function closeModal() {
+            document.getElementById('metricModal').classList.remove('show');
+        }
+
+        // Show Info Modal
+        function showInfoModal() {
+            document.getElementById('infoModal').classList.add('show');
+        }
+
+        // Close Info Modal
+        function closeInfoModal() {
+            document.getElementById('infoModal').classList.remove('show');
+        }
+
+        // Close modal when clicking outside
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('modal-overlay')) {
+                e.target.classList.remove('show');
+            }
+        });
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                document.getElementById('metricModal').classList.remove('show');
+                document.getElementById('infoModal').classList.remove('show');
+            }
+        });
+
+        // Initialize dashboard when page loads
+        document.addEventListener('DOMContentLoaded', initDashboard);
+    </script>
+</body>
+</html>
