@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>freenet AARRR Pirate Metrics Dashboard</title>
+    <title>fraenk AARRR Pirate Metrics Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
@@ -108,6 +108,66 @@
             max-width: 1600px;
             margin: 0 auto;
         }
+
+        /* GEÄNDERT: Wrapper ist nicht mehr Flexbox */
+        .video-text-wrapper {
+            max-width: 1200px; /* Begrenzte Breite für bessere Lesbarkeit/Zentrierung */
+            margin: 0 auto;
+            padding: 24px;
+            display: block;
+        }
+        
+        /* NEU: Zentrierte Erklärung über dem Video */
+        .dashboard-explanation {
+            text-align: center; /* Zentriert den Text */
+            font-size: 16px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 30px; 
+            padding: 0 5%;
+        }
+        .dashboard-explanation strong {
+            color: var(--text-light);
+        }
+        .explanation-header {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-light);
+            margin-bottom: 15px;
+        }
+
+        /* VIDEO-SEKTION zentriert */
+        .video-section {
+            text-align: center;
+            margin-bottom: 30px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .video-section iframe {
+            max-width: 100%; 
+            width: 100%; 
+            height: 450px;
+            aspect-ratio: 16 / 9;
+            display: block;
+            margin: 0 auto;
+        }
+        /* Responsiveness für das Video */
+        @media (max-width: 900px) {
+            .video-section iframe {
+                height: 350px;
+            }
+        }
+        @media (max-width: 768px) {
+            .video-section {
+                padding: 0 16px;
+            }
+            .video-section iframe {
+                height: 250px;
+            }
+        }
+        /* ENDE NEUE LAYOUT-KLASSEN */
+
 
         .dashboard-grid {
             display: grid;
@@ -288,13 +348,12 @@
             color: var(--text-light);
         }
 
-        /* GEÄNDERT: margin-top: 24px entfernt, da es jetzt im charts-column liegt */
         .table-section {
             background: var(--dark-card);
             border: 1px solid var(--dark-border);
             border-radius: 12px;
             padding: 24px;
-            /* margin-top: 24px; - ENTFERNT */ 
+            margin-top: 24px;
         }
 
         .table-header {
@@ -539,7 +598,7 @@
 </head>
 <body>
     <header class="header">
-        <div class="logo">freenet</div>
+        <div class="logo">fraenk</div>
         <div class="header-info">
             <div class="status-indicator">
                 <span class="status-dot"></span>
@@ -551,6 +610,31 @@
         </div>
     </header>
 
+    <div class="video-text-wrapper">
+        <div class="dashboard-explanation">
+            <h2 class="explanation-header">Anwar's AI-Betastate-Approach zur AARRRnalyse</h2>
+            <p>
+                Dieses Dashboard stellt die Performance von <strong>fraenk</strong> anhand geschätzter AARRR Pirate Metrics dar, die speziell für das digitalisierte Discount-Modell relevant sind.
+            </p>
+            <p>
+                Für eine tiefergehende Analyse des fraenk-Modells, das die Basis dieser Metriken bildet, sehen Sie sich das **unten** eingebettete Video an.
+            </p>
+            <p>
+                Die Kennzahlen (KPIs) auf der linken Seite und die Charts im Hauptbereich können direkt im Dashboard abgelesen werden. Durch Klicken auf die jeweilige Kachel oder den Info-Button (<span style="font-weight: 700;">ℹ️</span>) erscheint ein Fenster, in dem Sie sich detaillierter in die Metrik und die relevanten Marktfaktoren einlesen können.
+            </p>
+        </div>
+        
+        <div class="video-section">
+            <iframe 
+                src="https://www.youtube.com/embed/Zu0TNh2vnME" 
+                title="YouTube video player" 
+                frameborder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                referrerpolicy="strict-origin-when-cross-origin"
+                allowfullscreen>
+            </iframe>
+        </div>
+    </div>
     <div class="main-container">
         <div class="dashboard-grid">
             <div class="kpi-column" id="kpiColumn">
@@ -597,16 +681,15 @@
                             </tbody>
                     </table>
                 </div>
-                </div>
+            </div>
 
             <div class="stats-column" id="statsColumn">
                 </div>
         </div>
-
-        </div>
+    </div>
 
     <footer class="footer">
-        <div><strong>Quelle:</strong> freenet AG Geschäftsberichte 2024/2025</div>
+        <div><strong>Quelle:</strong> Schätzungen basierend auf Marktberichten und fraenk Produktstruktur</div>
         <div>© 2025 Perplexity</div>
     </footer>
 
@@ -645,116 +728,116 @@
     </div>
 
     <script>
-        // AARRR Metrics Data
+        // AARRR Metrics Data - ANGEPASST AUF FRAENK
         const metricsData = [
             {
                 kategorie: "Akquisition",
-                name: "Netto-Neukunden (Postpaid)",
-                wert: "182.000",
-                einheit: "Kunden",
+                name: "Netto-Neukunden (Digital)",
+                wert: "Hoch",
+                einheit: "Volumen",
                 zeitraum: "2024",
-                info: "Neukunden im Postpaid-Segment nach Abzug der Kündigungen im betrachteten Zeitraum. Zeigt Wachstum und Marktanteilsgewinne. Quelle: Freenet Geschäftsbericht 2024.",
-                insight: "Stärkstes Postpaid-Wachstum seit 2018, Indikator für erfolgreiche Vertriebskampagnen und Netzunabhängigkeit.",
-                trend: "+15%",
+                info: "Die **Netto-Neukunden** (neue Kunden abzüglich Kündigungen) zeigen das absolute Wachstum der Kundenbasis. Ein hohes Volumen deutet auf erfolgreiche Marktansprache und Wettbewerbsfähigkeit hin. Als reiner Online-Anbieter im attraktiven Telekom-Netz profitiert fraenk von geringen Akquisitionskosten. Die Kundengewinnung basiert stark auf der Einfachheit und dem günstigen 10 € Basispreis. Offizielle Kundenzahlen werden nicht separat veröffentlicht.",
+                insight: "Günstiges Preis-Leistungs-Verhältnis und 5G-Zugang im Top-Netz sorgen für konstant hohe Neukundenzahlen, getrieben durch Online-Deals.",
+                trend: "+10%",
                 category_class: "acquisition"
             },
             {
                 kategorie: "Akquisition",
                 name: "Conversion Rate Online-Marketing",
-                wert: "1,5-3",
+                wert: "4-6",
                 einheit: "%",
                 zeitraum: "2024",
-                info: "Anteil Website-Besucher, die nach Online-Kampagne einen Vertrag abschließen. Effizienz-Messung Online-Marketing. Quelle: adSoul Case Study.",
-                insight: "Werte über 1,5% gelten als sehr gut, Online-Kampagnen besonders effizient im Branchenvergleich.",
-                trend: "+0.5%",
+                info: "Die **Conversion Rate** ist der Prozentsatz der Website-Besucher, die eine gewünschte Aktion (hier: den Kaufabschluss) durchführen. Sie misst die Effizienz des Marketing-Funnels. Die digitale, App-basierte Struktur und der Wegfall komplexer Tarifauswahlen führen zu einer deutlich höheren Conversion Rate als im Branchendurchschnitt (1.5-3%), da der Kaufprozess extrem vereinfacht ist.",
+                insight: "Überdurchschnittlich hohe Conversion Rate aufgrund des 'No-Frills'-Ansatzes und des einfachen, schnellen Online-Abschlusses.",
+                trend: "Stabil",
                 category_class: "acquisition"
             },
             {
                 kategorie: "Aktivierung",
                 name: "Aktivierungsrate Neukunden",
-                wert: "85-90",
+                wert: "95-98",
                 einheit: "%",
                 zeitraum: "2024",
-                info: "Anteil der Neukunden mit Aktivierung (SIM/use) innerhalb 30 Tagen. Messung Onboarding-Qualität.",
-                insight: "Sehr hoher Wert spricht für einfache Prozesse, erste Nutzungsbarrieren gering.",
-                trend: "+2%",
+                info: "Die **Aktivierungsrate** misst den Anteil der Neukunden, die das Produkt nach dem Kauf erfolgreich in Betrieb nehmen (z.B. SIM-Karte einlegen/aktivieren). Sie ist ein Indikator für die Qualität des Onboarding-Prozesses. Der gesamte Service, von der Bestellung bis zur SIM-Aktivierung, wird über die fraenk App verwaltet. Die hohe Erfolgsquote spiegelt die Effizienz des rein digitalen, stark automatisierten Onboarding-Prozesses wider.",
+                insight: "Die App-zentrierte Verwaltung und das Fehlen physischer Shops maximieren die Kontrolle über den Onboarding-Flow und die sofortige Aktivierung.",
+                trend: "+1%",
                 category_class: "activation"
             },
             {
                 kategorie: "Aktivierung",
-                name: "Onboarding Completion",
-                wert: "70-80",
+                name: "App Daily Active Users (DAU)",
+                wert: "30-40",
                 einheit: "%",
-                zeitraum: "2024",
-                info: "Vollständige Onboarding-Rate: Aktivierung aller Services (z.B. App, eSIM) bis erste Nutzung.",
-                insight: "Niedrige Werte deuten oft auf Prozessoptimierungsbedarf.",
-                trend: "-1%",
+                zeitraum: "2024 (geschätzt)",
+                info: "Der **DAU-Wert (Daily Active Users)** misst den Prozentsatz der gesamten Nutzerbasis, der die App täglich nutzt. Dies ist ein Indikator für die Produktakzeptanz nach der Aktivierung. Bei fraenk ist dies der wichtigste Indikator für die Nutzung des zentralen Kundenkanals (Bezahlung, Daten-Upgrade, Kündigung). Hoher DAU-Wert deutet auf eine erfolgreiche Aktivierung der App-Nutzung hin.",
+                insight: "Hohe App-Nutzung ist entscheidend und spricht für eine gelungene Verankerung des Produkts im digitalen Alltag der Kunden.",
+                trend: "+3%",
                 category_class: "activation"
             },
             {
                 kategorie: "Bindung",
                 name: "Churn Rate",
-                wert: "8-9",
+                wert: "15-20",
                 einheit: "% pro Jahr",
-                zeitraum: "2024",
-                info: "Anteil gekündigter oder abgewanderter Kunden pro Jahr. Wichtigste Kenngröße für Loyalität und Kundenbindung.",
-                insight: "Tiefe Werte bedeuten starke Loyalität und Service-Qualität.",
-                trend: "-0.5%",
+                zeitraum: "2024 (geschätzt)",
+                info: "Die **Churn Rate** gibt den Prozentsatz der Kunden an, die das Unternehmen innerhalb eines bestimmten Zeitraums verlassen. Sie ist der wichtigste Indikator für Kundenloyalität. Aufgrund der **monatlichen Kündbarkeit** und des Fokus auf preissensible, digitale Kunden ist die Churn Rate von Natur aus höher als bei 24-Monats-Verträgen. Die effektive Churn-Reduktion erfolgt über das **Fraenk for Friends**-Programm.",
+                insight: "Erwartungsgemäß hohe Churn Rate durch flexible Kündbarkeit. Das Risiko wird durch attraktive, dauerhafte Datengeschenke (Referral) reduziert.",
+                trend: "Stabil",
                 category_class: "retention"
             },
             {
                 kategorie: "Bindung",
                 name: "Kundenbindungsrate",
-                wert: "91-92",
+                wert: "80-85",
                 einheit: "%",
-                zeitraum: "2024",
-                info: "Anteil aktiver Kunden nach 12 Monaten. Spiegelbild zur Churn Rate, also 100 minus Churn.",
-                insight: "Branchenüberdurchschnittlich, zeigt hohe Zufriedenheit und Langfristvertragsanteil.",
+                zeitraum: "2024 (geschätzt)",
+                info: "Die **Kundenbindungsrate** ist das Gegenstück zur Churn Rate (100 % minus Churn) und misst den Prozentsatz der Kunden, die dem Unternehmen über einen bestimmten Zeitraum treu bleiben. Die Loyalität wird durch **kontinuierliche, kostenlose Datenvolumen-Erhöhungen** für Bestandskunden und das Referral-Programm gesichert.",
+                insight: "Kundenloyalität wird über kontinuierliche 'Goodies' und Tarif-Upgrades statt über lange Vertragslaufzeiten gesichert.",
                 trend: "+0.5%",
                 category_class: "retention"
             },
             {
                 kategorie: "Umsatz",
                 name: "ARPU (ø Umsatz pro User)",
-                wert: "17,9",
+                wert: "10,0-15,0",
                 einheit: "€/Monat",
                 zeitraum: "2024",
-                info: "Ø Monatsumsatz pro Kunde exkl. Hardware. Zentrale Umsatzkenngröße. Quelle: H1/2025 Bericht.",
-                insight: "Stabil trotz Preiskämpfen; signalisiert wertorientierte Kundschaft.",
-                trend: "+0.2€",
+                info: "Der **Average Revenue per User (ARPU)** ist der durchschnittliche monatliche Umsatz pro Kunde. Er ist eine zentrale Kennzahl für die Monetarisierung der Kundenbasis. Der Basispreis liegt bei 10,00 €. Höherer ARPU wird ausschließlich durch **Upselling** von Datenvolumen (z.B. 25 GB zusätzlich für 5 €/Monat) oder monatliche Datenpässe generiert. Dies ist das primäre Monetarisierungsziel.",
+                insight: "Der Kern-ARPU ist niedrig und stabil. Der Monetarisierungserfolg hängt stark von der erfolgreichen Upselling-Quote für zusätzliche Datenvolumen ab.",
+                trend: "Stabil",
                 category_class: "revenue"
             },
             {
                 kategorie: "Umsatz",
                 name: "Customer Lifetime Value (CLTV)",
-                wert: "720-1.080",
+                wert: "180-360",
                 einheit: "€ (ges.)",
                 zeitraum: "2024 (berechnet)",
-                info: "Kundenwert über gesamte Vertragsdauer basierend auf ARPU, Laufzeit & Retention.",
-                insight: "Fundamentale Steuergröße für Kundenakquise-Budget.",
-                trend: "+50€",
+                info: "Der **CLTV** schätzt den Nettogewinn, der über die gesamte Dauer der Kundenbeziehung erwartet wird. Er dient als Maßstab für das maximale Akquisitionsbudget. Angesichts des monatlich kündbaren Discount-Tarifs und des niedrigeren ARPU ist der CLTV niedriger als bei 24-Monats-Verträgen. Der Wert wird durch extrem niedrige Akquisitionskosten und Betriebskosten (keine Shops) profitabel gehalten.",
+                insight: "Der Fokus liegt auf niedrigen Akquisitionskosten (CPA), um den niedrigeren CLTV profitabel zu halten.",
+                trend: "Stabil",
                 category_class: "revenue"
             },
             {
                 kategorie: "Empfehlung",
-                name: "Empfehlungs­programm Nutzung",
-                wert: "30",
-                einheit: "€ Prämie/Empfehlung",
-                zeitraum: "2024",
-                info: "Freunde-werben-Freunde-Programm. Prämie pro Neukunde über Empfehlung.",
-                insight: "Sehr effiziente Akquise dank Mundpropaganda, hohe Motivation durch Prämien.",
-                trend: "Stabil",
+                name: "Empfehlungs­programm Prämie",
+                wert: "+5 GB",
+                einheit: "Daten/Monat (dauerhaft)",
+                zeitraum: "2024/2025",
+                info: "Die **Prämie** ist der Anreiz, den ein Kunde (Werber) und ein Neukunde (Geworbener) für eine erfolgreiche Empfehlung erhalten. Sie misst die Attraktivität des Referral-Programms. Das 'fraenk for Friends'-Programm belohnt Werber und Geworbenen dauerhaft mit zusätzlichem Datenvolumen (+5 GB) zum gleichen monatlichen Preis. Dies erhöht den Produktwert, ohne direkten Geldfluss zu verursachen.",
+                insight: "Das Programm ist extrem effektiv, da es den direkten Produktwert (Datenvolumen) erhöht, was zu hoher Nutzung und geringeren Churn führt.",
+                trend: "Sehr hoch",
                 category_class: "referral"
             },
             {
                 kategorie: "Empfehlung",
                 name: "Empfehlungsquote (viral)",
-                wert: "1-2",
+                wert: "3-5",
                 einheit: "%",
                 zeitraum: "2024 (geschätzt)",
-                info: "Neukunden-Anteil, der über Empfehlungen gewonnen wurde. Viralitätsmesser.",
-                insight: "Werte >1% zeigen steigende Mundpropaganda und organisches Wachstum.",
-                trend: "+0.3%",
+                info: "Die **Empfehlungsquote (auch Viralitätsfaktor)** misst den Anteil neuer Kunden, die durch Empfehlungen gewonnen wurden. Ein hoher Wert zeigt starkes organisches Wachstum. Aufgrund des attraktiven und direkt nutzbaren Anreizes (+5 GB) und der Einfachheit des Produkts wird eine überdurchschnittliche Viralität angenommen. Das Programm ist eine der stärksten Akquisitionsquellen.",
+                insight: "Das Empfehlungsprogramm ist eine der stärksten Akquisitionsquellen und generiert ein hohes, organisches Wachstum.",
+                trend: "+0.5%",
                 category_class: "referral"
             }
         ];
@@ -768,7 +851,19 @@
             createStatsCards();
             createChartsSection();
             populateMetricsTable();
+            updateChartsData();
         }
+
+        // Funktion zum Anpassen der Chart-Daten (basierend auf fraenk-Performance)
+        function updateChartsData() {
+            // Passt die Performance Scores basierend auf den fraenk-Metriken an: 
+            // Aktivierung und Empfehlung hoch, Umsatz und Bindung niedriger (wegen monatl. Kündigung)
+            if (aarrrChart) {
+                aarrrChart.data.datasets[0].data = [90, 95, 75, 70, 95]; 
+                aarrrChart.update();
+            }
+        }
+
 
         // Create KPI Cards
         function createKPICards() {
@@ -799,72 +894,72 @@
         function createStatsCards() {
             const statsColumn = document.getElementById('statsColumn');
             
-            // Current Period Summary
+            // Current Period Summary - ANGEPASST AUF FRAENK
             const currentStats = document.createElement('div');
             currentStats.className = 'stats-card';
             currentStats.innerHTML = `
                 <h4 class="stats-header">Aktuelle Periode (2024)</h4>
                 <div class="stat-item">
-                    <span class="stat-label">Gesamtkunden</span>
-                    <span class="stat-value">7,2M</span>
+                    <span class="stat-label">Geschätzte Kundenbasis</span>
+                    <span class="stat-value">~300k</span>
                 </div>
                 <div class="stat-item">
-                    <span class="stat-label">Netto-Zuwachs</span>
-                    <span class="stat-value change-positive">+182k</span>
+                    <span class="stat-label">Basispreis ARPU</span>
+                    <span class="stat-value change-positive">10,0€</span>
                 </div>
                 <div class="stat-item">
-                    <span class="stat-label">Durchschnittl. ARPU</span>
-                    <span class="stat-value">17,9€</span>
+                    <span class="stat-label">Netzqualität</span>
+                    <span class="stat-value">Telekom 5G</span>
                 </div>
                 <div class="stat-item">
-                    <span class="stat-label">Retention Rate</span>
-                    <span class="stat-value change-positive">91-92%</span>
+                    <span class="stat-label">Kündigungsfrist</span>
+                    <span class="stat-value change-positive">Monatl.</span>
                 </div>
             `;
             
-            // Performance Indicators
+            // Performance Indicators - ANGEPASST AUF FRAENK
             const performanceStats = document.createElement('div');
             performanceStats.className = 'stats-card';
             performanceStats.innerHTML = `
                 <h4 class="stats-header">Performance Indikatoren</h4>
                 <div class="stat-item">
-                    <span class="stat-label">Churn Rate</span>
-                    <span class="stat-value change-positive">8-9%</span>
+                    <span class="stat-label">Gesch. Churn Rate</span>
+                    <span class="stat-value change-negative">15-20%</span>
                 </div>
                 <div class="stat-item">
                     <span class="stat-label">Aktivierungsrate</span>
-                    <span class="stat-value">85-90%</span>
+                    <span class="stat-value">95-98%</span>
                 </div>
                 <div class="stat-item">
                     <span class="stat-label">Conversion Rate</span>
-                    <span class="stat-value">1,5-3%</span>
+                    <span class="stat-value">4-6%</span>
                 </div>
                 <div class="stat-item">
-                    <span class="stat-label">Empfehlungsquote</span>
-                    <span class="stat-value change-positive">1-2%</span>
+                    <span class="stat-label">Referral Prämie</span>
+                    <span class="stat-value change-positive">+5 GB</span>
                 </div>
             `;
             
-            // Targets & Goals
+            // Targets & Goals - ANGEPASST AUF FRAENK
             const targetStats = document.createElement('div');
             targetStats.className = 'stats-card';
             targetStats.innerHTML = `
                 <h4 class="stats-header">Ziele & Prognosen</h4>
                 <div class="stat-item">
                     <span class="stat-label">CLTV Zielwert</span>
-                    <span class="stat-value">900€</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">Empfehlungsprämie</span>
-                    <span class="stat-value">30€</span>
+                    <span class="stat-value">250€</span>
                 </div>
                 <div class="stat-item">
                     <span class="stat-label">Ziel Churn Rate</span>
-                    <span class="stat-value"><8%</span>
+                    <span class="stat-value"><15%</span>
                 </div>
                 <div class="stat-item">
-                    <span class="stat-label">Ziel ARPU</span>
-                    <span class="stat-value">18,5€</span>
+                    <span class="stat-label">Ziel ARPU (mit Upgrades)</span>
+                    <span class="stat-value">12,5€</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">App-Bewertung (iOS/Android)</span>
+                    <span class="stat-value">4.5+</span>
                 </div>
             `;
             
@@ -873,13 +968,13 @@
             statsColumn.appendChild(targetStats);
         }
 
-        // Create Charts
+        // Create Charts (Logik beibehalten, Daten angepasst)
         function createChartsSection() {
             createRetentionChart();
             createAARRRChart();
         }
 
-        // Create Retention Chart
+        // Create Retention Chart (Daten auf fraenk-typisches Wachstum angepasst)
         function createRetentionChart() {
             const ctx = document.getElementById('retentionChart').getContext('2d');
             
@@ -888,8 +983,8 @@
                 data: {
                     labels: ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'],
                     datasets: [{
-                        label: 'Netto-Neukunden (Tausend)',
-                        data: [12, 15, 18, 22, 19, 16, 20, 24, 18, 21, 19, 25],
+                        label: 'Netto-Neukunden (Geschätzt in Tausend)',
+                        data: [4, 5, 6, 7, 6, 8, 9, 11, 10, 12, 11, 15],
                         borderColor: '#0066CC',
                         backgroundColor: 'rgba(0, 102, 204, 0.1)',
                         borderWidth: 3,
@@ -920,7 +1015,7 @@
             });
         }
 
-        // Create AARRR Overview Chart
+        // Create AARRR Overview Chart (Daten auf fraenk-Performance angepasst)
         function createAARRRChart() {
             const ctx = document.getElementById('aarrrChart').getContext('2d');
             
@@ -930,7 +1025,7 @@
                     labels: ['Akquisition', 'Aktivierung', 'Bindung', 'Umsatz', 'Empfehlung'],
                     datasets: [{
                         label: 'Performance Score',
-                        data: [85, 88, 92, 79, 71],
+                        data: [90, 95, 75, 70, 95], /* Scores angepasst */
                         backgroundColor: [
                             '#0066CC',
                             '#00CC66', 
@@ -997,14 +1092,14 @@
             } else if (metricId === 'chart-retention') {
                 metric = {
                     name: 'Netto-Neukunden Entwicklung',
-                    info: 'Zeigt die monatliche Entwicklung der Netto-Neukunden über das Jahr 2024.',
-                    insight: 'Kontinuierliches Wachstum mit saisonalen Schwankungen, besonders stark in Q4.'
+                    info: 'Zeigt die geschätzte monatliche Entwicklung der Netto-Neukunden, basierend auf der starken Marktdurchdringung von fraenk.',
+                    insight: 'Der digitale Ansatz ermöglicht schnelle Skalierung, erfordert aber kontinuierliche Marketinginvestitionen.'
                 };
             } else if (metricId === 'chart-aarrr') {
                 metric = {
                     name: 'AARRR Performance Score',
-                    info: 'Übersicht der Performance-Scores für alle AARRR-Kategorien basierend auf Branchenbenchmarks.',
-                    insight: 'Bindung ist die stärkste Kategorie, Empfehlungen haben noch Optimierungspotenzial.'
+                    info: 'Übersicht der Performance-Scores für alle AARRR-Kategorien. Besonders hoch bei Aktivierung und Empfehlung durch das einfache, App-basierte Produkt und die starke Viralität.',
+                    insight: 'Aktivierung und Empfehlung sind die Stärken. Bindung und Umsatz sind aufgrund des monatlich kündbaren Discount-Modells die größten Herausforderungen.'
                 };
             }
             
