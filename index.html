@@ -48,11 +48,15 @@
             backdrop-filter: blur(10px);
         }
 
-        .logo {
+        /* GEÄNDERT: Neuer Stil für die h1-Überschrift (Header Navbar) */
+        .logo h1 {
             font-size: 24px;
-            font-weight: 700;
+            font-weight: 800; /* Extra fett */
             color: var(--text-light);
-            letter-spacing: -0.5px;
+            letter-spacing: 0.5px;
+            line-height: 1;
+            margin: 0;
+            padding: 0;
         }
 
         .header-info {
@@ -129,11 +133,13 @@
         .dashboard-explanation strong {
             color: var(--text-light);
         }
+        /* GRUNDLEGEND GEÄNDERT: Header-Größe des Erklärtextes */
         .explanation-header {
-            font-size: 20px;
-            font-weight: 600;
+            font-size: 60px; /* Deutlich vergrößert (von 20px auf 60px) */
+            font-weight: 800;
             color: var(--text-light);
             margin-bottom: 15px;
+            line-height: 1.1;
         }
 
         /* VIDEO-SEKTION zentriert */
@@ -157,6 +163,9 @@
             .video-section iframe {
                 height: 350px;
             }
+            .explanation-header {
+                font-size: 28px; /* Herunterskalieren auf Tablets */
+            }
         }
         @media (max-width: 768px) {
             .video-section {
@@ -164,6 +173,9 @@
             }
             .video-section iframe {
                 height: 250px;
+            }
+            .explanation-header {
+                font-size: 36px; /* Weiteres Herunterskalieren auf Mobilgeräte */
             }
         }
         /* ENDE NEUE LAYOUT-KLASSEN */
@@ -595,10 +607,21 @@
             }
         }
     </style>
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-V8LZ1ZQH4P"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-V8LZ1ZQH4P');
+    </script>
 </head>
 <body>
     <header class="header">
-        <div class="logo">fraenk</div>
+        <div class="logo">
+            <h1>fraenk</h1>
+        </div>
         <div class="header-info">
             <div class="status-indicator">
                 <span class="status-dot"></span>
